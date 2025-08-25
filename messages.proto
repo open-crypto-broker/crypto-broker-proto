@@ -11,27 +11,27 @@ service CryptoBroker {
 
 // Metadata shared across al methods
 message Metadata {
-  string id =1;
-	string createdAt=2;
+  string id=1;
+  string createdAt=2;
 }
 
 // Message for a Hash Request
 message HashRequest {
-  string profile = 1;
-  bytes input = 2;
+  string profile=1;
+  bytes input=2;
   Metadata metadata=3;
 }
 
 // Response to a Hash Request
 message HashResponse {
-  string hashValue = 1;
-  string hashAlgorithm = 2;
+  string hashValue=1;
+  string hashAlgorithm=2;
   Metadata metadata=3;
 }
 
 // Message for a CSR (Certificate Sign Request)
 message SignRequest {
-  string profile = 1;
+  string profile=1;
   string csr=2;
   string caPrivateKey=3;
   string caCert=4;
@@ -44,6 +44,6 @@ message SignRequest {
 
 // Response to a Sign Request
 message SignResponse {
-  string signedCertificate = 1;
+  string signedCertificate=1;
   Metadata metadata=2;
 }
