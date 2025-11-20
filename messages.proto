@@ -5,14 +5,27 @@ package protobuf;
 option go_package = "internal/protobuf";
 
 service CryptoBroker {
+  rpc Status(StatusRequest) return (StatusResponse)
   rpc Hash(HashRequest) returns (HashResponse);
   rpc Sign(SignRequest) returns (SignResponse);
 }
 
-// Metadata shared across al methods
+// Metadata shared across all methods
 message Metadata {
   string id=1;
   string createdAt=2;
+}
+
+// Message for Status Request
+message StatusRequest {
+  string service=1;
+  Metadata metadata=2;
+}
+
+// Message for Status Response
+message StatusResponse {
+  string status=1;
+  Metadata metadata=2;
 }
 
 // Message for a Hash Request
@@ -29,7 +42,7 @@ message HashResponse {
   Metadata metadata=3;
 }
 
-// Message for a CSR (Certificate Sign Request)
+// Message for a CSR (Certificate Signing Request)
 message SignRequest {
   string profile=1;
   string csr=2;
