@@ -1,11 +1,13 @@
 syntax = "proto3";
 
-package protobuf;
+package CryptoBroker;
+
+// gRPC health-check messages
+import "grpc/health/v1/health.proto";
 
 option go_package = "internal/protobuf";
 
 service CryptoBroker {
-  rpc Status(StatusRequest) return (StatusResponse)
   rpc Hash(HashRequest) returns (HashResponse);
   rpc Sign(SignRequest) returns (SignResponse);
 }
@@ -14,18 +16,6 @@ service CryptoBroker {
 message Metadata {
   string id=1;
   string createdAt=2;
-}
-
-// Message for Status Request
-message StatusRequest {
-  string service=1;
-  Metadata metadata=2;
-}
-
-// Message for Status Response
-message StatusResponse {
-  string status=1;
-  Metadata metadata=2;
 }
 
 // Message for a Hash Request
