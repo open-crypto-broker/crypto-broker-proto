@@ -1,6 +1,9 @@
 syntax = "proto3";
 
-package protobuf;
+package CryptoBroker;
+
+// gRPC health-check messages
+import "grpc/health/v1/health.proto";
 
 option go_package = "internal/protobuf";
 
@@ -9,7 +12,7 @@ service CryptoBroker {
   rpc Sign(SignRequest) returns (SignResponse);
 }
 
-// Metadata shared across al methods
+// Metadata shared across all methods
 message Metadata {
   string id=1;
   string createdAt=2;
@@ -29,7 +32,7 @@ message HashResponse {
   Metadata metadata=3;
 }
 
-// Message for a CSR (Certificate Sign Request)
+// Message for a CSR (Certificate Signing Request)
 message SignRequest {
   string profile=1;
   string csr=2;
