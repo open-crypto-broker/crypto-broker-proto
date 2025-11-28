@@ -4,7 +4,7 @@ package CryptoBroker;
 
 option go_package = "internal/protobuf";
 
-service CryptoBroker {
+service CryptoGrpc {
   rpc Hash(HashRequest) returns (HashResponse);
   rpc Sign(SignRequest) returns (SignResponse);
 }
@@ -13,6 +13,17 @@ service CryptoBroker {
 message Metadata {
   string id=1;
   string createdAt=2;
+}
+
+// Message for a Benchmark Request
+message BenchmarkRequest {
+  Metadata metadata=1;
+}
+
+// Response for a Benchmark Request
+message BenchmarkResponse {
+  string benchmarkResults=1;
+  Metadata metadata=2;
 }
 
 // Message for a Hash Request
