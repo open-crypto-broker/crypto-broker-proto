@@ -5,6 +5,7 @@ package CryptoBroker;
 option go_package = "internal/protobuf";
 
 service CryptoGrpc {
+  rpc Benchmark(BenchmarkRequest) returns (BenchmarkResponse);
   rpc Hash(HashRequest) returns (HashResponse);
   rpc Sign(SignRequest) returns (SignResponse);
 }
