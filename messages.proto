@@ -48,8 +48,8 @@ message SignRequest {
   string caPrivateKey=3;
   string caCert=4;
   Metadata metadata=5;
-  optional string validNotBeforeOffset=6;
-  optional string validNotAfterOffset=7;
+  optional uint64 validNotBefore=6;
+  optional uint64 validNotAfter=7;
   optional string subject=8;
   repeated string crlDistributionPoints=9;
 }
