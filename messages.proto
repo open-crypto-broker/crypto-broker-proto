@@ -10,10 +10,19 @@ service CryptoGrpc {
   rpc Sign(SignRequest) returns (SignResponse);
 }
 
+// Trace context for manual propagation
+message TraceContext {
+  string traceId=1;
+  string spanId=2;
+  string traceFlags=3;
+  string traceState=4;
+}
+
 // Metadata shared across all methods
 message Metadata {
   string id=1;
   string createdAt=2;
+  TraceContext traceContext=3;
 }
 
 // Message for a Benchmark Request
