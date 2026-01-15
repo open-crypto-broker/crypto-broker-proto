@@ -8,6 +8,7 @@ service CryptoGrpc {
   rpc Benchmark(BenchmarkRequest) returns (BenchmarkResponse);
   rpc Hash(HashRequest) returns (HashResponse);
   rpc Sign(SignRequest) returns (SignResponse);
+  rpc FakeEndpoint(FakeEndpointRequest) returns (FakeEndpointResponse);
 }
 
 // Trace context for manual propagation
@@ -66,5 +67,16 @@ message SignRequest {
 // Response to a Sign Request
 message SignResponse {
   string signedCertificate=1;
+  Metadata metadata=2;
+}
+
+// Message for a Fake Endpoint Request
+message FakeEndpointRequest {
+  Metadata metadata=1;
+}
+
+// Response to a Fake Endpoint Request
+message FakeEndpointResponse {
+  string message=1;
   Metadata metadata=2;
 }
