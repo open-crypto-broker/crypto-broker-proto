@@ -23,7 +23,7 @@ message TraceContext {
 message Metadata {
   string id=1;
   string createdAt=2;
-  TraceContext traceContext=3;
+  optional TraceContext traceContext=3;
 }
 
 // Message for a Benchmark Request
