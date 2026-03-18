@@ -17,6 +17,7 @@ message TraceContext {
   string spanId=2;
   string traceFlags=3;
   string traceState=4;
+  string correlationId=5;
 }
 
 // Metadata shared across all methods
