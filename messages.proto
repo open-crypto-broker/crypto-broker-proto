@@ -26,7 +26,6 @@ message TraceContext {
 // Metadata shared across all methods
 message Metadata {
   string id=1;
-  string createdAt=2;
   optional TraceContext traceContext=3;
 }
 

@@ -7,7 +7,7 @@ This repository contains the definitions for the protobuf messages that will be 
 ### Messages
 
 - **Metadata**:
-  Contains basic information about a request, such as a unique ID and creation timestamp. This helps track and identify requests.
+  Contains basic information about a request, such as a unique ID. This helps track and identify requests.
 
 - **BenchmarkRequest**:
   Request a performance benchmark from the server.
