@@ -50,7 +50,7 @@ message HashRequest {
   string profile=1;
   bytes input=2;
   Metadata metadata=3;
-  HashOutputFormat hashOutputFormat=4;
+  HashOutputFormat outputFormat=4;
 }
 
 // Response to a Hash Request
