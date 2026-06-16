@@ -42,7 +42,7 @@ message BenchmarkResponse {
 
 enum HashOutputFormat {
   HEX = 0;
-  RAW_DIGEST_BYTES = 1;
+  RAW = 1;
 }
 
 // Message for a Hash Request
@@ -58,8 +58,8 @@ message HashResponse {
   string hashAlgorithm=2;
   Metadata metadata=3;
   oneof hashValue {
-    string hashValueHEX = 4;
-    bytes hashValueRDB  = 5;
+    string hashValueHex = 4;
+    bytes hashValueRaw  = 5;
   }
 }
 
