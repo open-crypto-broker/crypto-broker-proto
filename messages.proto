@@ -40,18 +40,27 @@ message BenchmarkResponse {
   Metadata metadata=2;
 }
 
+enum HashOutputFormat {
+  HEX = 0;
+  RAW = 1;
+}
+
 // Message for a Hash Request
 message HashRequest {
   string profile=1;
   bytes input=2;
   Metadata metadata=3;
+  HashOutputFormat outputFormat=4;
 }
 
 // Response to a Hash Request
 message HashResponse {
-  string hashValue=1;
   string hashAlgorithm=2;
   Metadata metadata=3;
+  oneof hashValue {
+    string hashValueHex = 4;
+    bytes hashValueRaw  = 5;
+  }
 }
 
 // Message for a CSR (Certificate Signing Request)
