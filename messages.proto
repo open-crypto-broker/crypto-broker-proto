@@ -86,8 +86,8 @@ message SignRequest {
 message SignResponse {
   Metadata metadata=2;
   oneof signedCertificate {
-    string signedCertificatePem = 3;
-    bytes signedCertificateDer  = 4;
+    string pem = 3;
+    bytes der  = 4;
   }
 }
 
