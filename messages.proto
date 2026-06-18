@@ -63,6 +63,11 @@ message HashResponse {
   }
 }
 
+enum SignOutputFormat {
+  DER = 0;
+  PEM = 1;
+}
+
 // Message for a CSR (Certificate Signing Request)
 message SignRequest {
   string profile=1;
@@ -78,8 +83,11 @@ message SignRequest {
 
 // Response to a Sign Request
 message SignResponse {
-  string signedCertificate=1;
   Metadata metadata=2;
+  oneof signedCertificate {
+    string signedCertificatePem = 3;
+    bytes signedCertificateDer  = 4;
+  }
 }
 
 // Message for a Fake Endpoint Request
