@@ -79,6 +79,7 @@ message SignRequest {
   optional uint64 validNotAfter=7;
   optional string subject=8;
   repeated string crlDistributionPoints=9;
+  SignOutputFormat outputFormat=10;
 }
 
 // Response to a Sign Request
