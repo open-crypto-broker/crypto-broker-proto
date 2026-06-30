@@ -4,14 +4,18 @@ package CryptoBroker;
 
 option go_package = "internal/protobuf";
 
+//
+// Public crypto service definition
+//
 service CryptoGrpc {
-  rpc Hash(HashRequest) returns (HashResponse);
-  rpc Sign(SignRequest) returns (SignResponse);
+  rpc HashData(HashDataRequest) returns (HashDataResponse);
+  rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
 }
 
-service CryptoGrpcDev {
-  rpc Benchmark(BenchmarkRequest) returns (BenchmarkResponse);
-  rpc FakeEndpoint(FakeEndpointRequest) returns (FakeEndpointResponse);
+// Metadata shared across all methods
+message Metadata {
+  string id=1;
+  optional TraceContext traceContext=3;
 }
 
 // Trace context for manual propagation
@@ -23,38 +27,26 @@ message TraceContext {
   string correlationId=5;
 }
 
-// Metadata shared across all methods
-message Metadata {
-  string id=1;
-  optional TraceContext traceContext=3;
-}
-
-// Message for a Benchmark Request
-message BenchmarkRequest {
-  Metadata metadata=1;
-}
-
-// Response for a Benchmark Request
-message BenchmarkResponse {
-  string benchmarkResults=1;
-  Metadata metadata=2;
-}
-
+// Output formats
 enum HashOutputFormat {
   HEX = 0;
   RAW = 1;
 }
 
-// Message for a Hash Request
-message HashRequest {
+enum SignOutputFormat {
+  DER = 0;
+  PEM = 1;
+}
+
+// HashData request and response messages
+message HashDataRequest {
   string profile=1;
   bytes input=2;
   Metadata metadata=3;
   HashOutputFormat outputFormat=4;
 }
 
-// Response to a Hash Request
-message HashResponse {
+message HashDataResponse {
   string hashAlgorithm=2;
   Metadata metadata=3;
   oneof hashValue {
@@ -63,13 +55,8 @@ message HashResponse {
   }
 }
 
-enum SignOutputFormat {
-  DER = 0;
-  PEM = 1;
-}
-
-// Message for a CSR (Certificate Signing Request)
-message SignRequest {
+// SignCertificate response and request messages
+message SignCertificateRequest {
   string profile=1;
   string csr=2;
   string caPrivateKey=3;
@@ -82,8 +69,8 @@ message SignRequest {
   SignOutputFormat outputFormat=10;
 }
 
-// Response to a Sign Request
-message SignResponse {
+// Response to a SignCertificate Request
+message SignCertificateResponse {
   Metadata metadata=2;
   oneof signedCertificate {
     string pem = 3;
@@ -91,12 +78,29 @@ message SignResponse {
   }
 }
 
-// Message for a Fake Endpoint Request
+//
+// Internal development service definition
+//
+service CryptoGrpcDev {
+  rpc Benchmark(BenchmarkRequest) returns (BenchmarkResponse);
+  rpc FakeEndpoint(FakeEndpointRequest) returns (FakeEndpointResponse);
+}
+
+// Benchmark request and response messages
+message BenchmarkRequest {
+  Metadata metadata=1;
+}
+
+message BenchmarkResponse {
+  string benchmarkResults=1;
+  Metadata metadata=2;
+}
+
+// FakeEndpoint request and response messages
 message FakeEndpointRequest {
   Metadata metadata=1;
 }
 
-// Response to a Fake Endpoint Request
 message FakeEndpointResponse {
   string message=1;
   Metadata metadata=2;
