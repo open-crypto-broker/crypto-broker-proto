@@ -5,14 +5,8 @@ package CryptoBroker;
 option go_package = "internal/protobuf";
 
 //
-// Public crypto service definition
+// Meta-structures shared across other messages and functions
 //
-service CryptoGrpc {
-  rpc HashData(HashDataRequest) returns (HashDataResponse);
-  rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
-}
-
-// Metadata shared across all methods
 message Metadata {
   string id=1;
   optional TraceContext traceContext=3;
@@ -36,6 +30,14 @@ enum HashOutputFormat {
 enum SignOutputFormat {
   DER = 0;
   PEM = 1;
+}
+
+//
+// Application-facing crypto service definition
+//
+service CryptoGrpc {
+  rpc HashData(HashDataRequest) returns (HashDataResponse);
+  rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
 }
 
 // HashData request and response messages

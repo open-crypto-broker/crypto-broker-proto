@@ -4,7 +4,7 @@ This repository contains the definitions for the protobuf messages that will be 
 
 ## Message structure
 
-The definitions are split into a public crypto service (`CryptoGrpc`), intended for client applications, and an internal development service (`CryptoGrpcDev`), used for benchmarking and testing.
+The definitions are split into an application-facing crypto service (`CryptoGrpc`), intended for client applications, and an internal development service (`CryptoGrpcDev`), used for benchmarking and testing.
 
 ### Shared messages
 
@@ -22,7 +22,7 @@ The definitions are split into a public crypto service (`CryptoGrpc`), intended 
 - **SignOutputFormat**:
   Selects the encoding of the returned signed certificate: `DER` (default) or `PEM`.
 
-### Public service: `CryptoGrpc`
+### Application-facing service: `CryptoGrpc`
 
 #### `CryptoGrpc` messages
 
