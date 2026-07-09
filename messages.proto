@@ -32,12 +32,38 @@ enum SignOutputFormat {
   PEM = 1;
 }
 
+// Key material source for symmetric encryption/decryption.
+// Exactly one variant is set, governed by the profile:
+// rawKey for caller-managed profiles (no KMS), keyId for broker-managed (KMS-backed) profiles.
+message KeySource {
+  oneof source {
+    string keyId  = 1;
+    bytes  rawKey = 2;
+  }
+}
+
+// Optional caller-supplied encryption parameters (nonce, AAD).
+// When omitted, the Crypto Broker generates or derives them according to the profile.
+message EncryptMetadata {
+  optional bytes nonce=1;
+  optional bytes aad=2;
+}
+
+// Parameters produced by EncryptData and required as input to DecryptData.
+message CipherMetadata {
+  bytes nonce=1;
+  optional bytes aad=2;
+  bytes tag=3;
+}
+
 //
 // Application-facing crypto service definition
 //
 service CryptoGrpc {
   rpc HashData(HashDataRequest) returns (HashDataResponse);
   rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
+  rpc EncryptData(EncryptDataRequest) returns (EncryptDataResponse);
+  rpc DecryptData(DecryptDataRequest) returns (DecryptDataResponse);
 }
 
 // HashData request and response messages
@@ -78,6 +104,36 @@ message SignCertificateResponse {
     string pem = 3;
     bytes der  = 4;
   }
+}
+
+// EncryptData request and response messages
+message EncryptDataRequest {
+  string profile=1;
+  KeySource keySource=2;
+  bytes plaintext=3;
+  EncryptMetadata encryptMetadata=4;
+  Metadata metadata=5;
+}
+
+message EncryptDataResponse {
+  bytes ciphertext=1;
+  CipherMetadata cipherMetadata=2;
+  string keyId=3;
+  Metadata metadata=4;
+}
+
+// DecryptData request and response messages
+message DecryptDataRequest {
+  string profile=1;
+  KeySource keySource=2;
+  bytes ciphertext=3;
+  CipherMetadata cipherMetadata=4;
+  Metadata metadata=5;
+}
+
+message DecryptDataResponse {
+  bytes plaintext=1;
+  Metadata metadata=2;
 }
 
 //
