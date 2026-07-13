@@ -32,12 +32,57 @@ enum SignOutputFormat {
   PEM = 1;
 }
 
+// Key material source for symmetric encryption/decryption.
+// Exactly one variant is set, governed by the profile:
+// rawKey for caller-managed profiles (no KMS), keyId for broker-managed (KMS-backed) profiles.
+message KeySource {
+  oneof source {
+    string keyId  = 1;
+    bytes  rawKey = 2;
+  }
+}
+
+// Optional caller-supplied encryption parameters (nonce, AAD).
+// When omitted, the Crypto Broker generates or derives them according to the profile.
+message EncryptMetadata {
+  optional bytes nonce=1;
+  optional bytes aad=2;
+}
+
+// Metadata returned alongside the ciphertext by EncryptData. It encapsulates
+// everything the caller may need besides the ciphertext itself. Each field is
+// optional and populated according to the flow:
+//   - keyId: echoed for KMS-backed profiles (hybrid and KMS-managed flows).
+//   - nonce/aad/tag: returned when the caller must retain them to decrypt later,
+//     i.e. caller-managed flows or the hybrid flow where the broker generated
+//     the nonce. In fully KMS-managed flows the broker stores these itself and
+//     omits them, so cipherMetadata may carry only the keyId.
+message CipherMetadata {
+  optional string keyId=1;
+  optional bytes nonce=2;
+  optional bytes aad=3;
+  optional bytes tag=4;
+}
+
+// Caller-supplied parameters for DecryptData. Symmetric to EncryptMetadata.
+// All fields are optional: in KMS-managed flows the broker resolves the required
+// parameters (e.g. a stored nonce) itself, so the caller may omit them. In
+// caller-managed or hybrid flows the caller provides them, typically by echoing
+// back the values from the CipherMetadata receipt returned by EncryptData.
+message DecryptMetadata {
+  optional bytes nonce=1;
+  optional bytes aad=2;
+  optional bytes tag=3;
+}
+
 //
 // Application-facing crypto service definition
 //
 service CryptoGrpc {
   rpc HashData(HashDataRequest) returns (HashDataResponse);
   rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
+  rpc EncryptData(EncryptDataRequest) returns (EncryptDataResponse);
+  rpc DecryptData(DecryptDataRequest) returns (DecryptDataResponse);
 }
 
 // HashData request and response messages
@@ -78,6 +123,35 @@ message SignCertificateResponse {
     string pem = 3;
     bytes der  = 4;
   }
+}
+
+// EncryptData request and response messages
+message EncryptDataRequest {
+  string profile=1;
+  KeySource keySource=2;
+  bytes plaintext=3;
+  optional EncryptMetadata encryptMetadata=4;
+  Metadata metadata=5;
+}
+
+message EncryptDataResponse {
+  bytes ciphertext=1;
+  CipherMetadata cipherMetadata=2;
+  Metadata metadata=3;
+}
+
+// DecryptData request and response messages
+message DecryptDataRequest {
+  string profile=1;
+  KeySource keySource=2;
+  bytes ciphertext=3;
+  optional DecryptMetadata decryptMetadata=4;
+  Metadata metadata=5;
+}
+
+message DecryptDataResponse {
+  bytes plaintext=1;
+  Metadata metadata=2;
 }
 
 //
