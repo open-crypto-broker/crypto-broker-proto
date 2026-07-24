@@ -3,6 +3,29 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.4.0] - 2026-07-24
+
+### 🚀 Features
+
+- Add encrypt decrypt gRPC messages (#29)
+- [**breaking**] Changed hash procedure message (#25)
+- [**breaking**] Removed created_at from metadata and updated docs (#22)
+- Add dependabot config (#17)
+
+### 🐛 Bug Fixes
+
+- Limit create-github-app-token permissions (#24)
+- Extract FakeEndpoint and Benchmark endpoints to separate service (#18)
+
+### 💼 Other
+
+- Change sign procedure contract (#26)
+
+### 🚜 Refactor
+
+- Change hash and sign protobuf definitions (#28)
+- Adjust workflow files (#20)
+
 ## [0.2.0] - 2026-04-24
 
 ### 🚀 Features
