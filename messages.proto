@@ -26,10 +26,10 @@ message CryptoDescriptor {
 }
 
 // Deprecation signal for a profile scheduled for a rolling migration (see ADR 0013).
-// supersededBy must only ever point to an equal-or-stronger profile.
+// replacedBy should point to an equal-or-stronger profile.
 message DeprecationWarning {
   string profile=1;
-  optional string supersededBy=2;
+  optional string replacedBy=2;
   optional string deprecatedSince=3;
   optional string removeAfter=4;
   optional string reason=5;
