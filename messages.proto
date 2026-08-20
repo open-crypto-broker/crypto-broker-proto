@@ -9,7 +9,30 @@ option go_package = "internal/protobuf";
 //
 message Metadata {
   string id=1;
+  // Attached to every response produced with a deprecated profile (see ADR 0013).
+  optional DeprecationWarning deprecation=2;
   optional TraceContext traceContext=3;
+}
+
+// Self-describing record of how a stored artifact was produced (see ADR 0013).
+// Persisted by the caller alongside the value so it stays verifiable and
+// migratable without access to Profiles.yaml.
+message CryptoDescriptor {
+  string profile=1;
+  // The API that produced the artifact, e.g. "HashData", "SignCertificate", "EncryptData".
+  string operation=2;
+  // The concrete algorithm actually used, e.g. "sha3-512", "aes-gcm".
+  string algorithm=3;
+}
+
+// Deprecation signal for a profile scheduled for a rolling migration (see ADR 0013).
+// replacedBy should point to an equal-or-stronger profile.
+message DeprecationWarning {
+  string profile=1;
+  optional string replacedBy=2;
+  optional string deprecatedSince=3;
+  optional string removeAfter=4;
+  optional string reason=5;
 }
 
 // Trace context for manual propagation
@@ -62,6 +85,8 @@ message CipherMetadata {
   optional bytes nonce=2;
   optional bytes aad=3;
   optional bytes tag=4;
+  // Self-describing descriptor persisted alongside the ciphertext (see ADR 0013).
+  CryptoDescriptor descriptor=5;
 }
 
 // Caller-supplied parameters for DecryptData. Symmetric to EncryptMetadata.
@@ -94,12 +119,14 @@ message HashDataRequest {
 }
 
 message HashDataResponse {
+  // Redundant with descriptor.algorithm; retained for backward compatibility.
   string hashAlgorithm=2;
   Metadata metadata=3;
   oneof hashValue {
     string hashValueHex = 4;
     bytes hashValueRaw  = 5;
   }
+  CryptoDescriptor descriptor=6;
 }
 
 // SignCertificate response and request messages
@@ -123,6 +150,7 @@ message SignCertificateResponse {
     string pem = 3;
     bytes der  = 4;
   }
+  CryptoDescriptor descriptor=5;
 }
 
 // EncryptData request and response messages
