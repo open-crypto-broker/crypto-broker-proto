@@ -55,6 +55,15 @@ enum SignOutputFormat {
   PEM = 1;
 }
 
+// Single source of truth for gRPC message size limits, applied as transport options in the server and clients.
+enum MessageSizeLimit {
+  MESSAGE_SIZE_LIMIT_UNSPECIFIED = 0;
+  // Max request accepted from client to server (2 MiB).
+  MESSAGE_SIZE_LIMIT_MAX_REQUEST_BYTES = 2097152;
+  // Max response returned from server to client (1 MiB).
+  MESSAGE_SIZE_LIMIT_MAX_RESPONSE_BYTES = 1048576;
+}
+
 // Key material source for symmetric encryption/decryption.
 // Exactly one variant is set, governed by the profile:
 // rawKey for caller-managed profiles (no KMS), keyId for broker-managed (KMS-backed) profiles.
