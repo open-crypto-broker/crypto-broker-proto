@@ -164,7 +164,7 @@ message EncryptDataRequest {
   string profile=1;
   KeySource keySource=2;
   bytes plaintext=3;
-  optional EncryptMetadata encryptMetadata=4;
+  EncryptMetadata encryptMetadata=4;
   Metadata metadata=5;
 }
 
@@ -179,7 +179,7 @@ message DecryptDataRequest {
   string profile=1;
   KeySource keySource=2;
   bytes ciphertext=3;
-  optional DecryptMetadata decryptMetadata=4;
+  DecryptMetadata decryptMetadata=4;
   Metadata metadata=5;
 }
 
