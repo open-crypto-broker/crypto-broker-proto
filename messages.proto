@@ -55,6 +55,16 @@ enum SignOutputFormat {
   PEM = 1;
 }
 
+// Output format for signatures produced by SignData and accepted by VerifyData.
+// SIGNATURE_CMS wraps the signature in an RFC 5652 CMS SignedData structure;
+// the other formats carry the bare signature value in the requested encoding.
+enum SignatureFormat {
+  SIGNATURE_RAW = 0;
+  SIGNATURE_DER = 1;
+  SIGNATURE_PEM = 2;
+  SIGNATURE_CMS = 3;
+}
+
 // Single source of truth for gRPC message size limits, applied as transport options in the server and clients.
 enum MessageSizeLimit {
   MESSAGE_SIZE_LIMIT_UNSPECIFIED = 0;
@@ -74,6 +84,23 @@ message KeySource {
     string keyId  = 1;
     bytes  rawKey = 2;
   }
+}
+
+// Signing key material for SignData/VerifyData.
+// Legacy and post-quantum modes use a single KeySource. Hybrid (composite)
+// mode uses two component keys via componentKeys: the traditional key and the
+// ML-DSA key. For VerifyData the KeySource(s) carry the corresponding public keys.
+message SignKeySource {
+  oneof source {
+    KeySource     single        = 1;
+    ComponentKeys componentKeys = 2;
+  }
+}
+
+// Ordered list of component key sources for hybrid (composite) signing:
+// the traditional key followed by the ML-DSA key.
+message ComponentKeys {
+  repeated KeySource keys = 1;
 }
 
 // Caller-supplied encryption parameters. The nonce is always provided by the caller;
@@ -110,6 +137,8 @@ message DecryptMetadata {
 service CryptoGrpc {
   rpc HashData(HashDataRequest) returns (HashDataResponse);
   rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
+  rpc SignData(SignDataRequest) returns (SignDataResponse);
+  rpc VerifyData(VerifyDataRequest) returns (VerifyDataResponse);
   rpc EncryptData(EncryptDataRequest) returns (EncryptDataResponse);
   rpc DecryptData(DecryptDataRequest) returns (DecryptDataResponse);
 }
@@ -155,6 +184,36 @@ message SignCertificateResponse {
     bytes der  = 4;
   }
   CryptoDescriptor descriptor=5;
+}
+
+// SignData request and response messages
+message SignDataRequest {
+  string profile=1;
+  SignKeySource keySource=2;
+  bytes input=3;
+  optional SignatureFormat signatureFormat=4;
+  Metadata metadata=5;
+}
+
+message SignDataResponse {
+  bytes signature=1;
+  CryptoDescriptor descriptor=2;
+  Metadata metadata=3;
+}
+
+// VerifyData request and response messages
+message VerifyDataRequest {
+  string profile=1;
+  SignKeySource keySource=2;
+  bytes input=3;
+  bytes signature=4;
+  optional SignatureFormat signatureFormat=5;
+  Metadata metadata=6;
+}
+
+message VerifyDataResponse {
+  bool valid=1;
+  Metadata metadata=2;
 }
 
 // EncryptData request and response messages
