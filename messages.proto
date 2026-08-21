@@ -57,7 +57,9 @@ enum SignOutputFormat {
 
 // Key material source for symmetric encryption/decryption.
 // Exactly one variant is set, governed by the profile:
-// rawKey for caller-managed profiles (no KMS), keyId for broker-managed (KMS-backed) profiles.
+// rawKey for caller-managed profiles (no KMS), keyId for KMS profiles where the broker
+// resolves the identifier and retrieves the externally provisioned key. The broker never
+// creates, imports, or deletes keys; key lifecycle is owned by the KMS/operator.
 message KeySource {
   oneof source {
     string keyId  = 1;
@@ -65,24 +67,21 @@ message KeySource {
   }
 }
 
-// Optional caller-supplied encryption parameters (nonce, AAD).
-// When omitted, the Crypto Broker generates or derives them according to the profile.
+// Caller-supplied encryption parameters. The nonce is always provided by the caller;
+// neither the broker nor the KMS generates it, so the caller owns nonce-uniqueness. AAD is optional.
 message EncryptMetadata {
-  optional bytes nonce=1;
+  bytes nonce=1;
   optional bytes aad=2;
 }
 
 // Metadata returned alongside the ciphertext by EncryptData. It encapsulates
-// everything the caller may need besides the ciphertext itself. Each field is
-// optional and populated according to the flow:
-//   - keyId: echoed for KMS-backed profiles (hybrid and KMS-managed flows).
-//   - nonce/aad/tag: returned when the caller must retain them to decrypt later,
-//     i.e. caller-managed flows or the hybrid flow where the broker generated
-//     the nonce. In fully KMS-managed flows the broker stores these itself and
-//     omits them, so cipherMetadata may carry only the keyId.
+// everything the caller may need besides the ciphertext itself:
+//   - keyId: echoed for KMS profiles; key material is never returned.
+//   - nonce/aad: echoed back; the caller supplied them and must retain them to decrypt.
+//   - tag: the authentication tag the caller must retain to decrypt later.
 message CipherMetadata {
   optional string keyId=1;
-  optional bytes nonce=2;
+  bytes nonce=2;
   optional bytes aad=3;
   optional bytes tag=4;
   // Self-describing descriptor persisted alongside the ciphertext (see ADR 0013).
@@ -90,12 +89,10 @@ message CipherMetadata {
 }
 
 // Caller-supplied parameters for DecryptData. Symmetric to EncryptMetadata.
-// All fields are optional: in KMS-managed flows the broker resolves the required
-// parameters (e.g. a stored nonce) itself, so the caller may omit them. In
-// caller-managed or hybrid flows the caller provides them, typically by echoing
-// back the values from the CipherMetadata receipt returned by EncryptData.
+// The caller provides the nonce, AAD and tag, typically by echoing back the
+// values from the CipherMetadata receipt returned by EncryptData.
 message DecryptMetadata {
-  optional bytes nonce=1;
+  bytes nonce=1;
   optional bytes aad=2;
   optional bytes tag=3;
 }
