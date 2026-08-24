@@ -93,8 +93,6 @@ message CipherMetadata {
   bytes nonce=2;
   optional bytes aad=3;
   optional bytes tag=4;
-  // Self-describing descriptor persisted alongside the ciphertext (see ADR 0013).
-  CryptoDescriptor descriptor=5;
 }
 
 // Caller-supplied parameters for DecryptData. Symmetric to EncryptMetadata.
@@ -172,6 +170,7 @@ message EncryptDataResponse {
   bytes ciphertext=1;
   CipherMetadata cipherMetadata=2;
   Metadata metadata=3;
+  CryptoDescriptor descriptor=4;
 }
 
 // DecryptData request and response messages
