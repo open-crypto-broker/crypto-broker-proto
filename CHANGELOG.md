@@ -3,6 +3,22 @@
 The list of commits in this changelog is automatically generated in the release process.
 The commits follow the Conventional Commit specification.
 
+## [0.5.0] - 2026-08-26
+
+### 🚀 Features
+
+- Adjust nonce strategy for encryptData and decryptData (#33)
+- Define gRPC message size limits (#32)
+- Add self-describing format and deprecation message (#31)
+
+### 🐛 Bug Fixes
+
+- Make EncryptMetadata and DecryptMetadata non optional (#34)
+
+### ⚙️ Miscellaneous Tasks
+
+- Adjust descriptor level for EncryptDataResponse (#36)
+
 ## [0.4.0] - 2026-07-24
 
 ### 🚀 Features
