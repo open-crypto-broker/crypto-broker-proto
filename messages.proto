@@ -63,6 +63,37 @@ enum MessageSizeLimit {
   // Max response returned from server to client (1 MiB).
   MESSAGE_SIZE_LIMIT_MAX_RESPONSE_BYTES = 1048576;
 }
+// Single source of truth for payload field size limits (values in bytes)
+enum PayloadFieldSizeLimit {
+  FIELD_SIZE_LIMIT_UNSPECIFIED = 0;
+  // Profile and Metadata
+  PROFILE_MAX_LEN = 64;
+  METADATA_ID_MAX_LEN = 128;
+  // Hash Data
+  HASH_DATA_INPUT_MAX_LEN = 1048576; // 1 MiB
+  // Sign Certificate
+  SIGN_CERTIFICATE_CSR_MAX_LEN = 65536; // 64 KiB
+  SIGN_CERTIFICATE_CA_PRIVATE_KEY_MAX_LEN = 65536; // 64 KiB
+  SIGN_CERTIFICATE_CA_CERT_MAX_LEN = 65536; // 64 KiB
+  SIGN_CERTIFICATE_SUBJECT_MAX_LEN = 1024; // 1 KiB
+  SIGN_CERTIFICATE_DISTRIBUTION_POINTS_MAX = 16; // #Entries, not bytes
+  SIGN_CERTIFICATE_DISTRIBUTION_POINT_MAX_LEN = 2048; // 2 KiB
+  // Encrypt / Decrypt Data
+  ENCRYPT_DECRYPT_DATA_KEYSOURCE_KEY_ID_MAX_LEN = 64;
+  ENCRYPT_DECRYPT_DATA_KEYSOURCE_KEY_RAW_MAX_LEN = 32;
+  ENCRYPT_DECRYPT_DATA_DATA_MAX_LEN = 64;
+  ENCRYPT_DECRYPT_DATA_NONCE_MAX_LEN = 32;
+  ENCRYPT_DECRYPT_DATA_TAG_MAX_LEN = 32;
+  ENCRYPT_DECRYPT_DATA_AAD_MAX_LEN = 32;
+  // Sign / Verify Data
+  // TBD
+  // Tracing
+  TRACE_ID_MAX_LEN = 32;
+  TRACE_SPAN_ID_MAX_LEN = 16;
+  TRACE_FLAGS_MAX_LEN = 2;
+  TRACE_STATE_MAX_LEN = 512;
+  TRACE_CORRELATION_ID_MAX_LEN = 128;
+}
 
 // Key material source for symmetric encryption/decryption.
 // Exactly one variant is set, governed by the profile:
