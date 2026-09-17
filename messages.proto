@@ -75,6 +75,7 @@ enum MessageSizeLimit {
 }
 // Single source of truth for payload field size limits (values in bytes)
 enum PayloadLimits {
+  option allow_alias = true;
   PAYLOAD_LIMITS_UNSPECIFIED = 0;
   // Profile and Metadata
   PAYLOAD_LIMITS_PROFILE_MAX_LEN = 64;
