@@ -1,68 +1,77 @@
 syntax = "proto3";
 
-package CryptoBroker;
+package cryptobroker.v1;
 
-option go_package = "internal/protobuf";
+//
+// Conventions for field ordering and presence in messages
+//
+// Field order convention: operation payload first, then operation-specific
+// receipts (CipherMetadata), then CryptoDescriptor and Metadata last.
+// Presence convention: `optional` only where the zero value is meaningful
+// (timestamps, AAD); enums rely on *_UNSPECIFIED instead (implicit optional).
 
 //
 // Meta-structures shared across other messages and functions
 //
 message Metadata {
-  string id=1;
+  string id = 1;
   // Attached to every response produced with a deprecated profile (see ADR 0013).
-  optional DeprecationWarning deprecation=2;
-  optional TraceContext traceContext=3;
+  optional DeprecationWarning deprecation = 2;
+  optional TraceContext trace_context = 3;
 }
 
 // Self-describing record of how a stored artifact was produced (see ADR 0013).
 // Persisted by the caller alongside the value so it stays verifiable and
 // migratable without access to Profiles.yaml.
 message CryptoDescriptor {
-  string profile=1;
+  string profile = 1;
   // The API that produced the artifact, e.g. "HashData", "SignCertificate", "EncryptData".
-  string operation=2;
+  string operation = 2;
   // The concrete algorithm actually used, e.g. "sha3-512", "aes-gcm".
-  string algorithm=3;
+  string algorithm = 3;
 }
 
 // Deprecation signal for a profile scheduled for a rolling migration (see ADR 0013).
-// replacedBy should point to an equal-or-stronger profile.
+// replaced_by should point to an equal-or-stronger profile.
 message DeprecationWarning {
-  string profile=1;
-  optional string replacedBy=2;
-  optional string deprecatedSince=3;
-  optional string removeAfter=4;
-  optional string reason=5;
+  string profile = 1;
+  optional string replaced_by = 2;
+  optional string deprecated_since = 3;
+  optional string remove_after = 4;
+  optional string reason = 5;
 }
 
 // Trace context for manual propagation
 message TraceContext {
-  string traceId=1;
-  string spanId=2;
-  string traceFlags=3;
-  string traceState=4;
-  string correlationId=5;
+  string trace_id = 1;
+  string span_id = 2;
+  string trace_flags = 3;
+  string trace_state = 4;
+  string correlation_id = 5;
 }
 
 // Output formats
 enum HashOutputFormat {
-  HEX = 0;
-  RAW = 1;
+  HASH_OUTPUT_FORMAT_UNSPECIFIED = 0;
+  HASH_OUTPUT_FORMAT_HEX = 1;
+  HASH_OUTPUT_FORMAT_RAW = 2;
 }
 
 enum SignOutputFormat {
-  DER = 0;
-  PEM = 1;
+  SIGN_OUTPUT_FORMAT_UNSPECIFIED = 0;
+  SIGN_OUTPUT_FORMAT_DER = 1;
+  SIGN_OUTPUT_FORMAT_PEM = 2;
 }
 
 // Output format for signatures produced by SignData and accepted by VerifyData.
-// SIGNATURE_CMS wraps the signature in an RFC 5652 CMS SignedData structure;
+// SIGNATURE_FORMAT_CMS wraps the signature in an RFC 5652 CMS SignedData structure;
 // the other formats carry the bare signature value in the requested encoding.
 enum SignatureFormat {
-  SIGNATURE_RAW = 0;
-  SIGNATURE_DER = 1;
-  SIGNATURE_PEM = 2;
-  SIGNATURE_CMS = 3;
+  SIGNATURE_FORMAT_UNSPECIFIED = 0;
+  SIGNATURE_FORMAT_RAW = 1;
+  SIGNATURE_FORMAT_DER = 2;
+  SIGNATURE_FORMAT_PEM = 3;
+  SIGNATURE_FORMAT_CMS = 4;
 }
 
 // Single source of truth for gRPC message size limits, applied as transport options in the server and clients.
@@ -73,9 +82,12 @@ enum MessageSizeLimit {
   // Max response returned from server to client (1 MiB).
   MESSAGE_SIZE_LIMIT_MAX_RESPONSE_BYTES = 1048576;
 }
+
 // Single source of truth for payload field size limits (values in bytes)
 enum PayloadLimits {
+  // Distinct limits legitimately share the same byte count.
   option allow_alias = true;
+
   PAYLOAD_LIMITS_UNSPECIFIED = 0;
   // Profile and Metadata
   PAYLOAD_LIMITS_PROFILE_MAX_LEN = 64;
@@ -108,24 +120,24 @@ enum PayloadLimits {
 
 // Key material source for symmetric encryption/decryption.
 // Exactly one variant is set, governed by the profile:
-// rawKey for caller-managed profiles (no KMS), keyId for KMS profiles where the broker
+// raw_key for caller-managed profiles (no KMS), key_id for KMS profiles where the broker
 // resolves the identifier and retrieves the externally provisioned key. The broker never
 // creates, imports, or deletes keys; key lifecycle is owned by the KMS/operator.
 message KeySource {
   oneof source {
-    string keyId  = 1;
-    bytes  rawKey = 2;
+    string key_id = 1;
+    bytes raw_key = 2;
   }
 }
 
 // Signing key material for SignData/VerifyData.
 // Legacy and post-quantum modes use a single KeySource. Hybrid (composite)
-// mode uses two component keys via componentKeys: the traditional key and the
+// mode uses two component keys via component_keys: the traditional key and the
 // ML-DSA key. For VerifyData the KeySource(s) carry the corresponding public keys.
 message SignKeySource {
   oneof source {
-    KeySource     single        = 1;
-    ComponentKeys componentKeys = 2;
+    KeySource single = 1;
+    ComponentKeys component_keys = 2;
   }
 }
 
@@ -138,35 +150,35 @@ message ComponentKeys {
 // Caller-supplied encryption parameters. The nonce is always provided by the caller;
 // neither the broker nor the KMS generates it, so the caller owns nonce-uniqueness. AAD is optional.
 message EncryptMetadata {
-  bytes nonce=1;
-  optional bytes aad=2;
+  bytes nonce = 1;
+  optional bytes aad = 2;
 }
 
 // Metadata returned alongside the ciphertext by EncryptData. It encapsulates
 // everything the caller may need besides the ciphertext itself:
-//   - keyId: echoed for KMS profiles; key material is never returned.
+//   - key_id: echoed for KMS profiles; key material is never returned.
 //   - nonce/aad: echoed back; the caller supplied them and must retain them to decrypt.
 //   - tag: the authentication tag the caller must retain to decrypt later.
 message CipherMetadata {
-  optional string keyId=1;
-  bytes nonce=2;
-  optional bytes aad=3;
-  optional bytes tag=4;
+  optional string key_id = 1;
+  bytes nonce = 2;
+  optional bytes aad = 3;
+  optional bytes tag = 4;
 }
 
 // Caller-supplied parameters for DecryptData. Symmetric to EncryptMetadata.
 // The caller provides the nonce, AAD and tag, typically by echoing back the
 // values from the CipherMetadata receipt returned by EncryptData.
 message DecryptMetadata {
-  bytes nonce=1;
-  optional bytes aad=2;
-  optional bytes tag=3;
+  bytes nonce = 1;
+  optional bytes aad = 2;
+  optional bytes tag = 3;
 }
 
 //
 // Application-facing crypto service definition
 //
-service CryptoGrpc {
+service CryptoService {
   rpc HashData(HashDataRequest) returns (HashDataResponse);
   rpc SignCertificate(SignCertificateRequest) returns (SignCertificateResponse);
   rpc SignData(SignDataRequest) returns (SignDataResponse);
@@ -177,131 +189,129 @@ service CryptoGrpc {
 
 // HashData request and response messages
 message HashDataRequest {
-  string profile=1;
-  bytes input=2;
-  Metadata metadata=3;
-  HashOutputFormat outputFormat=4;
+  string profile = 1;
+  bytes input = 2;
+  HashOutputFormat output_format = 4;
+  Metadata metadata = 3;
 }
 
 message HashDataResponse {
-  // Redundant with descriptor.algorithm; retained for backward compatibility.
-  string hashAlgorithm=2;
-  Metadata metadata=3;
-  oneof hashValue {
-    string hashValueHex = 4;
-    bytes hashValueRaw  = 5;
+  oneof hash_value {
+    string hash_value_hex = 2;
+    bytes hash_value_raw = 3;
   }
-  CryptoDescriptor descriptor=6;
+  CryptoDescriptor descriptor = 4;
+  Metadata metadata = 1;
 }
 
 // SignCertificate response and request messages
 message SignCertificateRequest {
-  string profile=1;
-  string csr=2;
-  string caPrivateKey=3;
-  string caCert=4;
-  Metadata metadata=5;
-  optional uint64 validNotBefore=6;
-  optional uint64 validNotAfter=7;
-  optional string subject=8;
-  repeated string crlDistributionPoints=9;
-  SignOutputFormat outputFormat=10;
+  string profile = 1;
+  string csr = 2;
+  string ca_private_key = 3;
+  string ca_cert = 4;
+  optional uint64 valid_not_before = 6;
+  optional uint64 valid_not_after = 7;
+  optional string subject = 8;
+  repeated string crl_distribution_points = 9;
+  SignOutputFormat output_format = 10;
+  Metadata metadata = 5;
 }
 
 // Response to a SignCertificate Request
 message SignCertificateResponse {
-  Metadata metadata=2;
-  oneof signedCertificate {
-    string pem = 3;
-    bytes der  = 4;
+  oneof signed_certificate {
+    string pem = 2;
+    bytes der = 3;
   }
-  CryptoDescriptor descriptor=5;
+  CryptoDescriptor descriptor = 4;
+  Metadata metadata = 1;
 }
 
 // SignData request and response messages
 message SignDataRequest {
-  string profile=1;
-  SignKeySource keySource=2;
-  bytes input=3;
-  optional SignatureFormat signatureFormat=4;
-  Metadata metadata=5;
+  string profile = 1;
+  SignKeySource key_source = 2;
+  bytes input = 3;
+  SignatureFormat signature_format = 4;
+  Metadata metadata = 5;
 }
 
 message SignDataResponse {
-  bytes signature=1;
-  CryptoDescriptor descriptor=2;
-  Metadata metadata=3;
+  bytes signature = 1;
+  CryptoDescriptor descriptor = 2;
+  Metadata metadata = 3;
 }
 
 // VerifyData request and response messages
 message VerifyDataRequest {
-  string profile=1;
-  SignKeySource keySource=2;
-  bytes input=3;
-  bytes signature=4;
-  optional SignatureFormat signatureFormat=5;
-  Metadata metadata=6;
+  string profile = 1;
+  SignKeySource key_source = 2;
+  bytes input = 3;
+  bytes signature = 4;
+  SignatureFormat signature_format = 5;
+  Metadata metadata = 6;
 }
 
 message VerifyDataResponse {
-  bool valid=1;
-  Metadata metadata=2;
+  bool valid = 1;
+  Metadata metadata = 2;
 }
 
 // EncryptData request and response messages
 message EncryptDataRequest {
-  string profile=1;
-  KeySource keySource=2;
-  bytes plaintext=3;
-  EncryptMetadata encryptMetadata=4;
-  Metadata metadata=5;
+  string profile = 1;
+  KeySource key_source = 2;
+  bytes plaintext = 3;
+  EncryptMetadata encrypt_metadata = 4;
+  Metadata metadata = 5;
 }
 
 message EncryptDataResponse {
-  bytes ciphertext=1;
-  CipherMetadata cipherMetadata=2;
-  Metadata metadata=3;
-  CryptoDescriptor descriptor=4;
+  bytes ciphertext = 1;
+  CipherMetadata cipher_metadata = 2;
+  CryptoDescriptor descriptor = 4;
+  Metadata metadata = 3;
 }
 
 // DecryptData request and response messages
 message DecryptDataRequest {
-  string profile=1;
-  KeySource keySource=2;
-  bytes ciphertext=3;
-  DecryptMetadata decryptMetadata=4;
-  Metadata metadata=5;
+  string profile = 1;
+  KeySource key_source = 2;
+  bytes ciphertext = 3;
+  DecryptMetadata decrypt_metadata = 4;
+  Metadata metadata = 5;
 }
 
 message DecryptDataResponse {
-  bytes plaintext=1;
-  Metadata metadata=2;
+  bytes plaintext = 1;
+  Metadata metadata = 2;
 }
 
 //
 // Internal development service definition
 //
-service CryptoGrpcDev {
+service CryptoDevService {
   rpc Benchmark(BenchmarkRequest) returns (BenchmarkResponse);
   rpc FakeEndpoint(FakeEndpointRequest) returns (FakeEndpointResponse);
 }
 
 // Benchmark request and response messages
 message BenchmarkRequest {
-  Metadata metadata=1;
+  Metadata metadata = 1;
 }
 
 message BenchmarkResponse {
-  string benchmarkResults=1;
-  Metadata metadata=2;
+  string benchmark_results = 1;
+  Metadata metadata = 2;
 }
 
 // FakeEndpoint request and response messages
 message FakeEndpointRequest {
-  Metadata metadata=1;
+  Metadata metadata = 1;
 }
 
 message FakeEndpointResponse {
-  string message=1;
-  Metadata metadata=2;
+  string message = 1;
+  Metadata metadata = 2;
 }
