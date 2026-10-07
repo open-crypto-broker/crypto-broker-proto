@@ -210,6 +210,7 @@ message SignCertificateRequest {
   string csr = 2;
   string ca_private_key = 3;
   string ca_cert = 4;
+  KeySource key_source = 11;
   optional uint64 valid_not_before = 6;
   optional uint64 valid_not_after = 7;
   optional string subject = 8;
