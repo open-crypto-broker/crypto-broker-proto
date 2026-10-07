@@ -1,0 +1,88 @@
+version: '3'
+
+vars:
+  BUF_VERSION: "1.73.0"
+
+tasks:
+  ################# Development Tools ####################
+  # Additional resources:
+  # - https://buf.build/docs/installation
+  # - https://buf.build/docs/lint/rules
+  tools:
+    desc: "Download tools required for development"
+    deps: [install-buf]
+    cmds:
+      - buf --version
+
+  # Public task to install the buf CLI depending on the architecture
+  install-buf:
+    desc: "Download and install the buf CLI"
+    cmds:
+      - task: install-buf-linux-amd64
+      - task: install-buf-darwin
+
+  check-prerequisites:
+    desc: "Verify all required tools are available (go)"
+    internal: true
+    silent: true
+    cmds:
+      - |
+        echo "[📋] Checking prerequisites..."
+        MISSING=0
+        for cmd in go; do
+          if ! command -v $cmd &> /dev/null; then
+            echo "[❌] Missing: $cmd"
+            MISSING=$((MISSING+1))
+          else
+            echo "[✅] Found: $cmd"
+          fi
+        done
+        if [ $MISSING -gt 0 ]; then
+          echo "[❌] $MISSING prerequisite(s) missing"
+          exit 1
+        fi
+        echo "[✅] All prerequisites found"
+
+  install-buf-linux-amd64:
+    desc: "Download and install the buf CLI for Linux"
+    internal: true
+    platforms: ["linux/amd64"]
+    deps: [check-prerequisites]
+    cmds:
+      - go install github.com/bufbuild/buf/cmd/buf@v{{.BUF_VERSION}}
+
+  install-buf-darwin:
+    desc: "Download and install the buf CLI for Apple/macOS"
+    internal: true
+    platforms: ["darwin"]
+    cmds:
+      - brew install buf
+
+  ################# Schema Checks ####################
+  lint:
+    desc: "Lints the protobuf definitions against the buf STANDARD rule set"
+    cmds:
+      - buf lint
+
+  format:
+    desc: "Applies the canonical protobuf formatting"
+    cmds:
+      - buf format --write --path cryptobroker
+
+  format-check:
+    desc: "Fails if the protobuf definitions are not canonically formatted"
+    cmds:
+      - buf format --diff --exit-code --path cryptobroker
+
+  breaking:
+    desc: "Detects breaking schema changes against the main branch"
+    cmds:
+      - buf breaking --against '.git#branch=main'
+
+  ################# Continuous Improvement Tasks ####################
+  ci:
+    desc: "Runs continuous integration checks on the protobuf definitions"
+    cmds:
+      - task: lint
+      - task: format-check
+      - task: breaking

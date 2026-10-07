@@ -1,0 +1,25 @@
+version: v2
+
+modules:
+  - path: .
+    excludes:
+      - third_party
+  # Vendored upstream schema: linted only for structural sanity, never restyled.
+  - path: third_party
+    lint:
+      use:
+        - MINIMAL
+
+lint:
+  use:
+    - STANDARD
+  ignore_only:
+    # PayloadLimits abuses an enum as a constant container, so distinct limits
+    # collide on the same number. Need to evaluate if this can be fixed with protovalidate.
+    ENUM_NO_ALLOW_ALIAS:
+      - cryptobroker/v1/messages.proto
+  disallow_comment_ignores: true
+
+breaking:
+  use:
+    - FILE
