@@ -206,6 +206,7 @@ message SignCertificateRequest {
   optional string subject=8;
   repeated string crlDistributionPoints=9;
   SignOutputFormat outputFormat=10;
+  KeySource keySource=11;
 }
 
 // Response to a SignCertificate Request
