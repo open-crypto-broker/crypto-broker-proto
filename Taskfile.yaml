@@ -14,49 +14,13 @@ tasks:
     cmds:
       - buf --version
 
-  # Public task to install the buf CLI depending on the architecture
   install-buf:
     desc: "Download and install the buf CLI"
-    cmds:
-      - task: install-buf-linux-amd64
-      - task: install-buf-darwin
-
-  check-prerequisites:
-    desc: "Verify all required tools are available (go)"
-    internal: true
-    silent: true
-    cmds:
-      - |
-        echo "[📋] Checking prerequisites..."
-        MISSING=0
-        for cmd in go; do
-          if ! command -v $cmd &> /dev/null; then
-            echo "[❌] Missing: $cmd"
-            MISSING=$((MISSING+1))
-          else
-            echo "[✅] Found: $cmd"
-          fi
-        done
-        if [ $MISSING -gt 0 ]; then
-          echo "[❌] $MISSING prerequisite(s) missing"
-          exit 1
-        fi
-        echo "[✅] All prerequisites found"
-
-  install-buf-linux-amd64:
-    desc: "Download and install the buf CLI for Linux"
-    internal: true
-    platforms: ["linux/amd64"]
-    deps: [check-prerequisites]
+    preconditions:
+      - sh: command -v go
+        msg: "Go is required to install buf, see https://go.dev/doc/install"
     cmds:
       - go install github.com/bufbuild/buf/cmd/buf@v{{.BUF_VERSION}}
-
-  install-buf-darwin:
-    desc: "Download and install the buf CLI for Apple/macOS"
-    internal: true
-    platforms: ["darwin"]
-    cmds:
-      - brew install buf
 
   ################# Schema Checks ####################
   lint:
