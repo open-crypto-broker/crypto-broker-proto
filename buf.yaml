@@ -22,4 +22,4 @@ lint:
 
 breaking:
   use:
-    - FILE
+    - WIRE
