@@ -208,6 +208,7 @@ message HashDataResponse {
 message SignCertificateRequest {
   string profile = 1;
   string csr = 2;
+  reserved 3;
   string ca_cert = 4;
   SignKeySource key_source = 11;
   optional uint64 valid_not_before = 6;
