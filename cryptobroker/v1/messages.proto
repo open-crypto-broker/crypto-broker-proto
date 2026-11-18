@@ -8,7 +8,8 @@ package cryptobroker.v1;
 // Field order convention: operation payload first, then operation-specific
 // receipts (CipherMetadata), then CryptoDescriptor and Metadata last.
 // Presence convention: `optional` only where the zero value is meaningful
-// (timestamps, AAD); enums rely on *_UNSPECIFIED instead (implicit optional).
+// (timestamps, AAD) or where a field applies to some profiles only
+// (output_bytes); enums rely on *_UNSPECIFIED instead (implicit optional).
 
 //
 // Meta-structures shared across other messages and functions
@@ -27,7 +28,8 @@ message CryptoDescriptor {
   string profile = 1;
   // The API that produced the artifact, e.g. "HashData", "SignCertificate", "EncryptData".
   string operation = 2;
-  // The concrete algorithm actually used, e.g. "sha3-512", "aes-gcm".
+  // The concrete algorithm actually used, e.g. "sha3-512", "aes-128-gcm".
+  // For extendable-output functions the output length in bits is appended, e.g. "shake-256/512".
   string algorithm = 3;
 }
 
@@ -192,6 +194,7 @@ message HashDataRequest {
   string profile = 1;
   bytes input = 2;
   HashOutputFormat output_format = 4;
+  optional uint32 output_bytes = 5; // For extendable-output functions (SHAKE128, SHAKE256).
   Metadata metadata = 3;
 }
 
